@@ -1,3 +1,8 @@
+## [3.0.3]
+
+* Migrate to `3.13.0`.
+* The minimum supported Flutter version is `3.3.0`.
+
 ## [3.0.2]
 
 * Migrate to `3.0.0`.
