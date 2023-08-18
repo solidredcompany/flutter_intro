@@ -41,8 +41,8 @@ class _AdvancedUsageState extends State<AdvancedUsage> {
                       child: Column(
                         children: [
                           params.onNext == null
-                              ? Column(
-                                  children: const [
+                              ? const Column(
+                                  children: [
                                     Text(
                                       'Of course, you can also render what you want through overlayBuilder.',
                                       style: TextStyle(height: 1.6),
