@@ -368,7 +368,7 @@ class Intro extends InheritedWidget {
         );
       },
     );
-    Overlay.of(_context!)!.insert(_overlayEntry!);
+    Overlay.of(_context!).insert(_overlayEntry!);
   }
 
   void start() {
@@ -384,7 +384,13 @@ class Intro extends InheritedWidget {
 
   static Intro of(BuildContext context) {
     _context = context;
-    return context.dependOnInheritedWidgetOfExactType<Intro>()!;
+    Intro? intro = context.dependOnInheritedWidgetOfExactType<Intro>();
+    if (intro == null) {
+      throw FlutterIntroException(
+        'The context does not contain an Intro widget.',
+      );
+    }
+    return intro;
   }
 
   void dispose() {

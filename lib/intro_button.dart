@@ -15,7 +15,7 @@ class IntroButton extends StatelessWidget {
       height: 28,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
-          primary: Colors.white,
+          foregroundColor: Colors.white,
           shape: StadiumBorder(),
           side: onPressed == null
               ? null
