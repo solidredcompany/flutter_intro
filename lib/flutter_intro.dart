@@ -42,9 +42,6 @@ class Intro extends InheritedWidget {
   /// No animation
   final bool noAnimation;
 
-  /// Click on whether the mask is allowed to be closed.
-  final bool maskClosable;
-
   /// [order] order
   final String Function(
     int order,
@@ -55,7 +52,6 @@ class Intro extends InheritedWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(4)),
     this.maskColor = const Color.fromRGBO(0, 0, 0, .6),
     this.noAnimation = false,
-    this.maskClosable = false,
     this.buttonTextBuilder,
     required Widget child,
   }) : super(child: child) {
@@ -127,16 +123,13 @@ class Intro extends InheritedWidget {
     );
     return AnimatedPositioned(
       duration: _animationDuration,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          padding: padding,
-          decoration: decoration,
-          width: width,
-          height: height,
-          child: child,
-          duration: _animationDuration,
-        ),
+      child: AnimatedContainer(
+        padding: padding,
+        decoration: decoration,
+        width: width,
+        height: height,
+        child: child,
+        duration: _animationDuration,
       ),
       left: left,
       top: top,
@@ -304,50 +297,41 @@ class Intro extends InheritedWidget {
           removed: _removed,
           childPersist: true,
           duration: _animationDuration,
-          child: Material(
-            color: Colors.transparent,
-            child: Stack(
-              children: [
-                ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    maskColor,
-                    BlendMode.srcOut,
+          child: IgnorePointer(
+            child: Material(
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                      maskColor,
+                      BlendMode.srcOut,
+                    ),
+                    child: Stack(
+                      children: [
+                        _widgetBuilder(
+                          backgroundBlendMode: BlendMode.dstOut,
+                          left: 0,
+                          top: 0,
+                          right: 0,
+                          bottom: 0,
+                        ),
+                        _widgetBuilder(
+                          width: _widgetSize.width,
+                          height: _widgetSize.height,
+                          left: _widgetOffset.dx,
+                          top: _widgetOffset.dy,
+                          borderRadiusGeometry: _currentIntroStepBuilder?.borderRadius ?? borderRadius,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      _widgetBuilder(
-                        backgroundBlendMode: BlendMode.dstOut,
-                        left: 0,
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        onTap: maskClosable
-                            ? () {
-                                Future.delayed(
-                                  const Duration(milliseconds: 200),
-                                  () {
-                                    _render();
-                                  },
-                                );
-                              }
-                            : null,
-                      ),
-                      _widgetBuilder(
-                        width: _widgetSize.width,
-                        height: _widgetSize.height,
-                        left: _widgetOffset.dx,
-                        top: _widgetOffset.dy,
-                        borderRadiusGeometry: _currentIntroStepBuilder?.borderRadius ?? borderRadius,
-                        onTap: _currentIntroStepBuilder?.onHighlightWidgetTap,
-                      ),
-                    ],
+                  _DelayRenderedWidget(
+                    duration: _animationDuration,
+                    child: _overlayWidget,
                   ),
-                ),
-                _DelayRenderedWidget(
-                  duration: _animationDuration,
-                  child: _overlayWidget,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

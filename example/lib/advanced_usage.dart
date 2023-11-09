@@ -80,11 +80,6 @@ class _AdvancedUsageState extends State<AdvancedUsage> {
                       ),
                     );
                   },
-                  onHighlightWidgetTap: () {
-                    setState(() {
-                      rendered = true;
-                    });
-                  },
                   builder: (context, key) => Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [

@@ -14,9 +14,6 @@ class IntroStepBuilder extends StatefulWidget {
   /// And will pass in some parameters on the current page through [StepWidgetParams]
   final Widget Function(StepWidgetParams params)? overlayBuilder;
 
-  /// When highlight widget is tapped
-  final VoidCallback? onHighlightWidgetTap;
-
   /// [Widget] [borderRadius] of the selected area, the default is [BorderRadius.all(Radius.circular(4))]
   final BorderRadiusGeometry? borderRadius;
 
@@ -35,7 +32,6 @@ class IntroStepBuilder extends StatefulWidget {
     this.text,
     this.overlayBuilder,
     this.borderRadius,
-    this.onHighlightWidgetTap,
     this.padding,
     this.onWidgetLoad,
   })  : assert(text != null || overlayBuilder != null),

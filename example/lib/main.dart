@@ -74,7 +74,6 @@ class StartPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (BuildContext context) => Intro(
-                      maskClosable: true,
                       child: const AdvancedUsage(),
                     ),
                   ),
