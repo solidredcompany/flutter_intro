@@ -59,8 +59,7 @@ class Intro extends InheritedWidget {
     this.buttonTextBuilder,
     required Widget child,
   }) : super(child: child) {
-    _animationDuration =
-        noAnimation ? Duration(milliseconds: 0) : Duration(milliseconds: 300);
+    _animationDuration = noAnimation ? Duration(milliseconds: 0) : Duration(milliseconds: 300);
   }
 
   IntroStatus get status => IntroStatus(isOpen: _overlayEntry != null);
@@ -75,9 +74,7 @@ class Intro extends InheritedWidget {
           0;
 
   bool get hasPrevStep =>
-      _finishedIntroStepBuilderList
-          .indexWhere((element) => element == _currentIntroStepBuilder) >
-      0;
+      _finishedIntroStepBuilderList.indexWhere((element) => element == _currentIntroStepBuilder) > 0;
 
   IntroStepBuilder? _getNextIntroStepBuilder({
     bool isUpdate = false,
@@ -85,17 +82,15 @@ class Intro extends InheritedWidget {
     if (isUpdate) {
       return _currentIntroStepBuilder;
     }
-    int index = _finishedIntroStepBuilderList
-        .indexWhere((element) => element == _currentIntroStepBuilder);
+    int index = _finishedIntroStepBuilderList.indexWhere((element) => element == _currentIntroStepBuilder);
     if (index != _finishedIntroStepBuilderList.length - 1) {
       return _finishedIntroStepBuilderList[index + 1];
     } else {
       _introStepBuilderList.sort((a, b) => a.order - b.order);
-      final introStepBuilder =
-          _introStepBuilderList.cast<IntroStepBuilder?>().firstWhere(
-                (e) => !_finishedIntroStepBuilderList.contains(e),
-                orElse: () => null,
-              );
+      final introStepBuilder = _introStepBuilderList.cast<IntroStepBuilder?>().firstWhere(
+            (e) => !_finishedIntroStepBuilderList.contains(e),
+            orElse: () => null,
+          );
       return introStepBuilder;
     }
   }
@@ -106,8 +101,7 @@ class Intro extends InheritedWidget {
     if (isUpdate) {
       return _currentIntroStepBuilder;
     }
-    int index = _finishedIntroStepBuilderList
-        .indexWhere((element) => element == _currentIntroStepBuilder);
+    int index = _finishedIntroStepBuilderList.indexWhere((element) => element == _currentIntroStepBuilder);
     if (index > 0) {
       return _finishedIntroStepBuilderList[index - 1];
     }
@@ -198,16 +192,12 @@ class Intro extends InheritedWidget {
 
     _screenSize = MediaQuery.of(_context!).size;
     _widgetSize = Size(
-      renderBox.size.width +
-          (introStepBuilder.padding?.horizontal ?? padding.horizontal),
-      renderBox.size.height +
-          (introStepBuilder.padding?.vertical ?? padding.vertical),
+      renderBox.size.width + (introStepBuilder.padding?.horizontal ?? padding.horizontal),
+      renderBox.size.height + (introStepBuilder.padding?.vertical ?? padding.vertical),
     );
     _widgetOffset = Offset(
-      renderBox.localToGlobal(Offset.zero).dx -
-          (introStepBuilder.padding?.left ?? padding.left),
-      renderBox.localToGlobal(Offset.zero).dy -
-          (introStepBuilder.padding?.top ?? padding.top),
+      renderBox.localToGlobal(Offset.zero).dx - (introStepBuilder.padding?.left ?? padding.left),
+      renderBox.localToGlobal(Offset.zero).dy - (introStepBuilder.padding?.top ?? padding.top),
     );
 
     OverlayPosition position = _StepWidgetBuilder.getOverlayPosition(
@@ -273,9 +263,7 @@ class Intro extends InheritedWidget {
                     height: 12,
                   ),
                   IntroButton(
-                    text: buttonTextBuilder == null
-                        ? 'Next'
-                        : buttonTextBuilder!(introStepBuilder.order),
+                    text: buttonTextBuilder == null ? 'Next' : buttonTextBuilder!(introStepBuilder.order),
                     onPressed: _render,
                   ),
                 ],
@@ -302,8 +290,7 @@ class Intro extends InheritedWidget {
       builder: (BuildContext context) {
         Size currentScreenSize = MediaQuery.of(context).size;
 
-        if (_screenSize.width != currentScreenSize.width ||
-            _screenSize.height != currentScreenSize.height) {
+        if (_screenSize.width != currentScreenSize.width || _screenSize.height != currentScreenSize.height) {
           _screenSize = currentScreenSize;
 
           _th.throttle(() {
@@ -350,9 +337,7 @@ class Intro extends InheritedWidget {
                         height: _widgetSize.height,
                         left: _widgetOffset.dx,
                         top: _widgetOffset.dy,
-                        borderRadiusGeometry:
-                            _currentIntroStepBuilder?.borderRadius ??
-                                borderRadius,
+                        borderRadiusGeometry: _currentIntroStepBuilder?.borderRadius ?? borderRadius,
                         onTap: _currentIntroStepBuilder?.onHighlightWidgetTap,
                       ),
                     ],
@@ -380,6 +365,14 @@ class Intro extends InheritedWidget {
     _render(
       isUpdate: true,
     );
+  }
+
+  void next() {
+    _render();
+  }
+
+  void previous() {
+    _render();
   }
 
   static Intro of(BuildContext context) {
