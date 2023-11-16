@@ -114,7 +114,7 @@ class Intro extends InheritedWidget {
     double? right,
     BorderRadiusGeometry? borderRadiusGeometry,
     Widget? child,
-    VoidCallback? onTap,
+    bool blockTaps = false,
   }) {
     final decoration = BoxDecoration(
       color: Colors.white,
@@ -123,13 +123,22 @@ class Intro extends InheritedWidget {
     );
     return AnimatedPositioned(
       duration: _animationDuration,
-      child: AnimatedContainer(
-        padding: padding,
-        decoration: decoration,
-        width: width,
-        height: height,
-        child: child,
-        duration: _animationDuration,
+      // If the widget should block taps, they are absorbed here,
+      // otherwise they are ignored so that widgets below this can receive
+      // them.
+      child: IgnorePointer(
+        ignoring: !blockTaps,
+        child: AbsorbPointer(
+          absorbing: blockTaps,
+          child: AnimatedContainer(
+            padding: padding,
+            decoration: decoration,
+            width: width,
+            height: height,
+            child: child,
+            duration: _animationDuration,
+          ),
+        ),
       ),
       left: left,
       top: top,
@@ -207,20 +216,23 @@ class Intro extends InheritedWidget {
       _overlayWidget = Stack(
         children: [
           Positioned(
-            child: SizedBox(
-              child: introStepBuilder.overlayBuilder!(
-                StepWidgetParams(
-                  order: introStepBuilder.order,
-                  onNext: hasNextStep ? _render : null,
-                  onPrev: hasPrevStep
-                      ? () {
-                          _render(reverse: true);
-                        }
-                      : null,
-                  onFinish: _onFinish,
-                  screenSize: _screenSize,
-                  size: _widgetSize,
-                  offset: _widgetOffset,
+            child: Material(
+              color: Colors.transparent,
+              child: SizedBox(
+                child: introStepBuilder.overlayBuilder!(
+                  StepWidgetParams(
+                    order: introStepBuilder.order,
+                    onNext: hasNextStep ? _render : null,
+                    onPrev: hasPrevStep
+                        ? () {
+                            _render(reverse: true);
+                          }
+                        : null,
+                    onFinish: _onFinish,
+                    screenSize: _screenSize,
+                    size: _widgetSize,
+                    offset: _widgetOffset,
+                  ),
                 ),
               ),
             ),
@@ -236,30 +248,33 @@ class Intro extends InheritedWidget {
       _overlayWidget = Stack(
         children: [
           Positioned(
-            child: SizedBox(
-              width: position.width,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: position.crossAxisAlignment,
-                children: [
-                  Text(
-                    introStepBuilder.text!,
-                    softWrap: true,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                      color: Colors.white,
+            child: Material(
+              color: Colors.transparent,
+              child: SizedBox(
+                width: position.width,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: position.crossAxisAlignment,
+                  children: [
+                    Text(
+                      introStepBuilder.text!,
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        height: 1.4,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  IntroButton(
-                    text: buttonTextBuilder == null ? 'Next' : buttonTextBuilder!(introStepBuilder.order),
-                    onPressed: _render,
-                  ),
-                ],
+                    SizedBox(
+                      height: 12,
+                    ),
+                    IntroButton(
+                      text: buttonTextBuilder == null ? 'Next' : buttonTextBuilder!(introStepBuilder.order),
+                      onPressed: _render,
+                    ),
+                  ],
+                ),
               ),
             ),
             left: position.left,
@@ -297,42 +312,67 @@ class Intro extends InheritedWidget {
           removed: _removed,
           childPersist: true,
           duration: _animationDuration,
-          child: IgnorePointer(
-            child: Material(
-              color: Colors.transparent,
-              child: Stack(
-                children: [
-                  ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                      maskColor,
-                      BlendMode.srcOut,
+          child: Stack(
+            children: [
+              ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  maskColor,
+                  BlendMode.srcOut,
+                ),
+                child: Stack(
+                  children: [
+                    // Grayed out area to the left of the highlight.
+                    _widgetBuilder(
+                      backgroundBlendMode: BlendMode.dstOut,
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: _widgetOffset.dx,
+                      blockTaps: true,
                     ),
-                    child: Stack(
-                      children: [
-                        _widgetBuilder(
-                          backgroundBlendMode: BlendMode.dstOut,
-                          left: 0,
-                          top: 0,
-                          right: 0,
-                          bottom: 0,
-                        ),
-                        _widgetBuilder(
-                          width: _widgetSize.width,
-                          height: _widgetSize.height,
-                          left: _widgetOffset.dx,
-                          top: _widgetOffset.dy,
-                          borderRadiusGeometry: _currentIntroStepBuilder?.borderRadius ?? borderRadius,
-                        ),
-                      ],
+                    // Grayed out area to the right of the highlight.
+                    _widgetBuilder(
+                      backgroundBlendMode: BlendMode.dstOut,
+                      left: _widgetOffset.dx + _widgetSize.width,
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      blockTaps: true,
                     ),
-                  ),
-                  _DelayRenderedWidget(
-                    duration: _animationDuration,
-                    child: _overlayWidget,
-                  ),
-                ],
+                    // Grayed out area above the highlight.
+                    _widgetBuilder(
+                      backgroundBlendMode: BlendMode.dstOut,
+                      left: 0,
+                      top: 0,
+                      right: 0,
+                      height: _widgetOffset.dy,
+                      blockTaps: true,
+                    ),
+                    // Grayed out area below the highlight.
+                    _widgetBuilder(
+                      backgroundBlendMode: BlendMode.dstOut,
+                      left: 0,
+                      top: _widgetOffset.dy + _widgetSize.height,
+                      right: 0,
+                      bottom: 0,
+                      blockTaps: true,
+                    ),
+                    // The highlight itself.
+                    _widgetBuilder(
+                      width: _widgetSize.width,
+                      height: _widgetSize.height,
+                      left: _widgetOffset.dx,
+                      top: _widgetOffset.dy,
+                      borderRadiusGeometry: _currentIntroStepBuilder?.borderRadius ?? borderRadius,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              _DelayRenderedWidget(
+                duration: _animationDuration,
+                child: _overlayWidget,
+              ),
+            ],
           ),
         );
       },
