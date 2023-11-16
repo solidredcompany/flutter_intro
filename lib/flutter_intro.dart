@@ -72,6 +72,8 @@ class Intro extends InheritedWidget {
   bool get hasPrevStep =>
       _finishedIntroStepBuilderList.indexWhere((element) => element == _currentIntroStepBuilder) > 0;
 
+  int? get currentStep => _currentIntroStepBuilder?.order;
+
   IntroStepBuilder? _getNextIntroStepBuilder({
     bool isUpdate = false,
   }) {
@@ -147,25 +149,41 @@ class Intro extends InheritedWidget {
     );
   }
 
-  void _onFinish() {
+  void _onFinish({bool withoutAnimation = false}) {
     if (_overlayEntry == null) return;
 
     _removed = true;
     _overlayEntry!.markNeedsBuild();
-    Timer(_animationDuration, () {
+
+    void finish() {
       if (_overlayEntry == null) return;
       _overlayEntry!.remove();
       _removed = false;
       _overlayEntry = null;
       _introStepBuilderList.clear();
       _finishedIntroStepBuilderList.clear();
-    });
+    }
+
+    if (withoutAnimation) {
+      finish();
+      return;
+    }
+
+    Timer(_animationDuration, finish);
   }
 
-  void _render({
+  Future<void> _render({
     bool isUpdate = false,
     bool reverse = false,
-  }) {
+    bool scrollToNext = false,
+  }) async {
+    // Removed widgets should not be rendered during an update.
+    if (isUpdate && _removed) return;
+
+    // A removed widget that is rendered again should no longer be considered
+    // removed.
+    _removed = false;
+
     IntroStepBuilder? introStepBuilder = reverse
         ? _getPrevIntroStepBuilder(
             isUpdate: isUpdate,
@@ -173,6 +191,14 @@ class Intro extends InheritedWidget {
         : _getNextIntroStepBuilder(
             isUpdate: isUpdate,
           );
+
+    if (scrollToNext) {
+      await Scrollable.ensureVisible(
+        introStepBuilder!._key.currentContext!,
+        duration: _animationDuration,
+      );
+    }
+
     _currentIntroStepBuilder = introStepBuilder;
 
     if (introStepBuilder == null) {
@@ -391,8 +417,11 @@ class Intro extends InheritedWidget {
     );
   }
 
-  void next() {
-    _render();
+  /// Show the next step.
+  ///
+  /// If [scrollToNext] is true, the widget will scroll to the next step first.
+  void next({bool scrollToNext = false}) {
+    _render(scrollToNext: scrollToNext);
   }
 
   void previous() {
@@ -410,8 +439,12 @@ class Intro extends InheritedWidget {
     return intro;
   }
 
-  void dispose() {
-    _onFinish();
+  /// Close the intro.
+  ///
+  /// If [withoutAnimation] is true, the intro will be closed without animation.
+  /// This should be used when changing to another page for example.
+  void dispose({bool withoutAnimation = false}) {
+    _onFinish(withoutAnimation: withoutAnimation);
   }
 
   @override
